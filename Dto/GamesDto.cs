@@ -18,12 +18,12 @@ namespace SteamAPI.Dto
         [JsonPropertyName("genres")]
         public string Genres { get; set; }
 
-        public GamesDto(int appId, string name, string developer, string plataforms, string categories, string genres)
+        public GamesDto(int appId, string name, string developer, string platforms, string categories, string genres)
         {
             AppId = appId;
             Name = name;
             Developer = developer;
-            Platforms = plataforms;
+            Platforms = platforms;
             Categories = categories;
             Genres = genres;
         }

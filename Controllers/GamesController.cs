@@ -62,7 +62,7 @@ namespace SteamAPI.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status415UnsupportedMediaType)]
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] GamesDto entity)
         {
-            var databaseGames = await _repository.GetByKey(id);
+            Games databaseGames = await _repository.GetByKey(id);
 
             if (databaseGames == null)
             {
@@ -71,12 +71,12 @@ namespace SteamAPI.Controllers
                 return Created(string.Empty, inserted);
             }
 
+            _logger.LogInformation($"{_dateTime.ToString("dd/MM/yyyy HH:mm:ss")} - Game {databaseGames.Id} - {databaseGames.Name} " +
+                $"- Alterado de {JsonSerializer.Serialize(databaseGames)} para {JsonSerializer.Serialize(entity)}");
+
             databaseGames = UpdateGamesModel(databaseGames, entity);
 
             var updated = await _repository.Update(id, databaseGames);
-
-            _logger.LogInformation($"{_dateTime.ToString("G")} - Game {databaseGames.Id} - {databaseGames.Name} " +
-                $"- Alterado de {JsonSerializer.Serialize(databaseGames)} para {JsonSerializer.Serialize(updated)}");
 
             return Ok(updated);
         }
@@ -97,8 +97,13 @@ namespace SteamAPI.Controllers
             if (databaseGames == null)
                 return NoContent();
 
+            _logger.LogInformation($"{_dateTime.ToString("dd/MM/yyyy HH:mm:ss")} - Game {databaseGames.Id} - {databaseGames.Name} " +
+                $"- Alterado de platforms: {databaseGames.Platforms} para platforms: {entity.Platforms}");
+
             databaseGames.Platforms = entity.Platforms;
+
             var updated = await _repository.Update(id, databaseGames);
+
             return Ok(updated);
         }
 
@@ -111,6 +116,10 @@ namespace SteamAPI.Controllers
                 return NoContent();
 
             var deleted = await _repository.Delete(id);
+
+            _logger.LogInformation($"{_dateTime.ToString("dd/MM/yyyy HH:mm:ss")} - Game {databaseGames.Id} - {databaseGames.Name} " +
+                $"- Removido");
+
             return Ok(deleted);
         }
     }
