@@ -3,6 +3,7 @@ using SteamAPI.Dto;
 using SteamAPI.Interfaces;
 using SteamAPI.Models;
 using System.Net.Mime;
+using System.Text.Json;
 
 namespace SteamAPI.Controllers
 {
@@ -10,12 +11,13 @@ namespace SteamAPI.Controllers
     [ApiController]
     public class GamesController : ControllerBase
     {
-        private readonly ILogger<GamesController> _logger;
         private readonly IBaseRepository<Games> _repository;
-        public GamesController(ILogger<GamesController> logger, IBaseRepository<Games> repository)
+        private readonly ILogger<GamesController> _logger;
+        private readonly DateTime _dateTime = new DateTime(2021, 01, 01, 13, 45, 00);
+        public GamesController(IBaseRepository<Games> repository, ILogger<GamesController> logger)
         {
-            _logger = logger;
             _repository = repository;
+            _logger = logger;
         }
 
         private Games UpdateGamesModel(Games newData, GamesDto entity)
@@ -61,14 +63,21 @@ namespace SteamAPI.Controllers
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] GamesDto entity)
         {
             var databaseGames = await _repository.GetByKey(id);
+
             if (databaseGames == null)
             {
-                var gamesToInsert = new Games(id: 0, entity.AppId, entity.Name, entity.Developer, entity.Platforms, entity.Categories, entity.Genres);
+                var gamesToInsert = new Games(id: 0, entity.AppId, entity.Name, entity.Developer, entity.Platforms, categories: entity.Categories, genres: entity.Genres);
                 var inserted = await _repository.Insert(gamesToInsert);
                 return Created(string.Empty, inserted);
             }
+
             databaseGames = UpdateGamesModel(databaseGames, entity);
+
             var updated = await _repository.Update(id, databaseGames);
+
+            _logger.LogInformation($"{_dateTime.ToString("G")} - Game {databaseGames.Id} - {databaseGames.Name} " +
+                $"- Alterado de {JsonSerializer.Serialize(databaseGames)} para {JsonSerializer.Serialize(updated)}");
+
             return Ok(updated);
         }
 

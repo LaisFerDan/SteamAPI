@@ -21,13 +21,13 @@ namespace SteamAPI.Models
         [JsonPropertyName("genres")]
         public string Genres { get; set; }
 
-        public Games(int id, int appId, string name, string developer, string plataforms, string categories, string genres)
+        public Games(int id, int appId, string name, string developer, string platforms, string categories, string genres)
         {
             Id = id;
             AppId = appId;
             Name = name;
             Developer = developer;
-            Platforms = plataforms;
+            Platforms = platforms;
             Categories = categories;
             Genres = genres;
         }
